@@ -1,0 +1,9 @@
+
+#!/usr/bin/env bash
+
+
+function dc(){
+    docker-compose -p msg-limit -f docker-compose.local.yml  --env-file=.env $@
+}
+
+dc $@
