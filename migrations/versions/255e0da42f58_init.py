@@ -1,23 +1,33 @@
-"""initial
+"""init
 
-Revision ID: f732a27cf6e9
+Revision ID: 255e0da42f58
 Revises: 
-Create Date: 2024-05-03 03:17:28.098033
+Create Date: 2024-05-03 17:41:50.368849
 
 """
 
 from typing import Sequence, Union
 
 from alembic import op
-import sqlalchemy_utils
 import sqlalchemy as sa
+import sqlalchemy_utils
 
 
 # revision identifiers, used by Alembic.
-revision: str = "f732a27cf6e9"
+revision: str = "255e0da42f58"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
+
+
+class PlatformTypeChoices:
+    TELEGRAM = 1
+    VK = 2
+
+    CHOICES = (
+        (TELEGRAM, "telegram"),
+        (VK, "vk"),
+    )
 
 
 class MessageStatusChoices:
@@ -37,6 +47,11 @@ def upgrade() -> None:
     op.create_table(
         "platforms",
         sa.Column("name", sa.String(length=64), nullable=False),
+        sa.Column(
+            "type",
+            sqlalchemy_utils.types.choice.ChoiceType(PlatformTypeChoices.CHOICES, impl=sa.SmallInteger()),
+            nullable=False,
+        ),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_platforms")),
     )
@@ -79,9 +94,11 @@ def upgrade() -> None:
     op.create_table(
         "message_events",
         sa.Column("text", sa.String(), nullable=False),
+        sa.Column("type", sa.String(length=64), nullable=False),
         sa.Column(
             "status",
             sqlalchemy_utils.types.choice.ChoiceType(MessageStatusChoices.CHOICES, impl=sa.SmallInteger()),
+            default=MessageStatusChoices.WAITING,
             nullable=True,
         ),
         sa.Column("client_id", sa.Integer(), nullable=False),
