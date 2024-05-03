@@ -4,11 +4,11 @@ from sqlalchemy import ForeignKey, Integer, SmallInteger, String
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped, relationship
 
-from common.db.models.base import BaseModel
+from db.models.base import BaseModel
 
 
 if TYPE_CHECKING:
-    from common.db.models.client import Client
+    from db.models.client import Client
 
 
 class MessageStatusChoices:

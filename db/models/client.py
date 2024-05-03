@@ -3,12 +3,12 @@ from sqlalchemy import Boolean, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped, relationship
 
-from common.db.models.base import BaseModel
+from db.models.base import BaseModel
 
 
 if TYPE_CHECKING:
-    from common.db.models.message import MessageEvent
-    from common.db.models.platform import Platform
+    from db.models.message import MessageEvent
+    from db.models.platform import Platform
 
 
 class Client(BaseModel):

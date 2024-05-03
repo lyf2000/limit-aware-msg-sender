@@ -3,13 +3,13 @@ from sqlalchemy import String
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped, relationship
 
-from common.db.models.base import BaseModel
+from db.models.base import BaseModel
 
 
 if TYPE_CHECKING:
-    from common.db.models.conversation import ConversationType
-    from common.db.models.message import MessageEvent
-    from common.db.models.client import Client
+    from db.models.conversation import ConversationType
+    from db.models.message import MessageEvent
+    from db.models.client import Client
 
 
 class Platform(BaseModel):

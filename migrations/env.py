@@ -1,11 +1,11 @@
 from alembic import context
 from sqlalchemy import create_engine
 
-from common.db.models.base import Base
-from common.db.models.client import Client
-from common.db.models.message import MessageEvent
-from common.db.models.platform import Platform
-from common.db.models.conversation import ConversationType, ConversationRule
+from db.models.base import Base
+from db.models.client import Client
+from db.models.message import MessageEvent
+from db.models.platform import Platform
+from db.models.conversation import ConversationType, ConversationRule
 
 from common.settings import settings
 
