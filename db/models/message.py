@@ -1,6 +1,6 @@
 from sqlalchemy_utils import ChoiceType
 from typing import TYPE_CHECKING
-from sqlalchemy import ForeignKey, Integer, SmallInteger, String
+from sqlalchemy import ForeignKey, SmallInteger, String
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped, relationship
 
@@ -27,6 +27,7 @@ class MessageEvent(BaseModel):
     __tablename__ = "message_events"
 
     text = mapped_column(String, nullable=False, default="")
+    type = mapped_column(String(64), nullable=False)
 
     status = mapped_column(
         ChoiceType(MessageStatusChoices.CHOICES, impl=SmallInteger),

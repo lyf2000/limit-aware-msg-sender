@@ -1,6 +1,13 @@
 version: '3.8'
 
 services:
+  consumer:
+    build:
+      context: .
+      dockerfile: ./compose/consumer/Dockerfile
+
+    environment:
+      AMQP_URL: 'amqp://rmuser:rmpassword@rabbitmq:5672/?connection_attempts=3&retry_delay=5'
   db:
     image: postgres:15.2-alpine
     volumes:
@@ -21,46 +28,23 @@ services:
       timeout: 5s
       retries: 5
 
-  # redis:
-  #   image: redis:7-alpine
-  #   volumes:
-  #     - redis_data:/data
-  #   ports:
-  #     - 6379:6379
-    # env_file:
-    #   - ./compose/.env
-    # command: redis-server --requirepass ${REDIS_PASSWORD}
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
 
-  # celery_worker:
-  #   build:
-  #     context: .
-  #     dockerfile: ./compose/django/Dockerfile
-  #   image: api
-  #   command: /start-celeryworker
-  #   volumes:
-  #     - .:/app
-  #     - media:/app/public
-  #   depends_on:
-  #     - redis
-  #   env_file:
-  #     - ./compose/.env
-  #   restart: always
-
-  # celery_beat:
-  #   build:
-  #     context: .
-  #     dockerfile: ./compose/django/Dockerfile
-  #   image: api
-  #   command: /start-celerybeat
-  #   volumes:
-  #     - .:/app
-  #     - media:/app/public
-  #   depends_on:
-  #     - redis
-  #   env_file:
-  #     - ./compose/.env
-  #   restart: always
+  rabbitmq:
+    image: 'rabbitmq:3.12.7'
+    volumes:
+      - "rabbitmq_data:/var/lib/rabbitmq"
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: 'rmuser'
+      RABBITMQ_DEFAULT_PASS: 'rmpassword'
 
 volumes:
-    postgres_data:
-    # redis_data:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
