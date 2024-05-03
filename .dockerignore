@@ -1,0 +1,5 @@
+venv
+compose
+.env
+migrations
+alembic.ini
