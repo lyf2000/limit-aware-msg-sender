@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class Message(BaseModel):
+class ConsumerMessage(BaseModel):
     type: str  # conversation_type key
     client_id: int
 

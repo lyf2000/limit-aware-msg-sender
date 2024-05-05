@@ -5,7 +5,7 @@ from common.logic.models.message import MessageEventLogic
 from common.service.senders import MESSAGE_SERVICE_PLATFORM_TYPE_MAP
 from common.service.senders.base import MessageSendResult, MessageSendResultStatusChoices
 from common.service.senders.errors import MessageSendError, MessageSendLimitExceedError
-from consumer.schema import Message
+from consumer.schema import ConsumerMessage
 from db.models.message import MessageEvent
 from db.service.message import MessageModelService
 
@@ -14,7 +14,7 @@ logger = logging.getLogger("message.sending")
 
 
 # TODO add logging decorator
-async def _consume(message: Message):
+async def consume(message: ConsumerMessage):
     message_event = MessageEvent(
         text=message.text,
         client_id=message.client_id,

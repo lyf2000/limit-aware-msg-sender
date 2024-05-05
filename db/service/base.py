@@ -10,7 +10,7 @@ class BaseModelService:
     MODEL: Type[Base]
 
     @classmethod
-    async def create(cls, obj: MODEL):
+    async def create(cls, obj: "MODEL"):
         with get_session_context() as session:
             session.add(obj)
             session.commit()

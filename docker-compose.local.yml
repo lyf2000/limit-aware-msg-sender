@@ -5,8 +5,8 @@ services:
     build:
       context: .
       dockerfile: ./compose/consumer/Dockerfile
-    volumes:
-      - .:/app
+    # volumes:
+    #   - .:/app
     environment:
       AMQP_URL: 'amqp://rmuser:rmpassword@rabbitmq:5672'
   db:

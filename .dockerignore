@@ -4,3 +4,4 @@ compose
 migrations
 alembic.ini
 __pycache__
+.*
