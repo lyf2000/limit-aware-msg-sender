@@ -5,10 +5,10 @@ services:
     build:
       context: .
       dockerfile: ./compose/consumer/Dockerfile
-    depends_on:
-      - rabbitmq
+    volumes:
+      - .:/app
     environment:
-      AMQP_URL: 'amqp://rmuser:rmpassword@rabbitmq-container:5672/?connection_attempts=3&retry_delay=5'
+      AMQP_URL: 'amqp://rmuser:rmpassword@rabbitmq:5672'
   db:
     image: postgres:15.2-alpine
     volumes:
@@ -35,12 +35,9 @@ services:
       - redis_data:/data
 
   rabbitmq:
-    image: 'rabbitmq:3.12.7'
-    hostname: rabbitmq-container
+    image: 'rabbitmq:3.12.7-management'
     volumes:
       - "rabbitmq_data:/var/lib/rabbitmq"
-    networks:
-      - resolute
     ports:
       - '5672:5672'
       - '15672:15672'
@@ -52,8 +49,3 @@ volumes:
   postgres_data:
   redis_data:
   rabbitmq_data:
-
-networks:
-  resolute:
-    external: true
-    name: resolute
