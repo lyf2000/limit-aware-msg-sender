@@ -2,7 +2,7 @@ from typing import Type
 
 from sqlalchemy import select
 
-from db.connection import get, get_session, get_session_context
+from db.connection import get, get_session_context
 from db.models.base import Base
 
 
@@ -11,9 +11,9 @@ class BaseModelService:
 
     @classmethod
     async def create(cls, obj: "MODEL"):
-        with get_session_context() as session:
+        async with get_session_context() as session:
             session.add(obj)
-            session.commit()
+            await session.commit()
 
     @classmethod
     async def get(cls, **kwargs):

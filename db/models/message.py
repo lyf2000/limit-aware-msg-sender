@@ -30,7 +30,7 @@ class MessageEvent(BaseModel):
     type = mapped_column(String(64), nullable=False)
 
     status = mapped_column(
-        ChoiceType(MessageStatusChoices.CHOICES, impl=SmallInteger),
+        ChoiceType(MessageStatusChoices.CHOICES, impl=SmallInteger()),
         default=MessageStatusChoices.WAITING,
     )
 

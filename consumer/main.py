@@ -3,11 +3,6 @@ import asyncio
 import os
 import aio_pika
 
-import sys
-
-print(sys.path)
-sys.path.append("../common")
-sys.path.append("../db")
 
 from consumer.consumer import consume
 from consumer.schema import ConsumerMessage

@@ -25,9 +25,9 @@ Base.metadata = MetaData(naming_convention=convention)
 
 class BaseModel(Base):
     __abstract__ = True
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer(), primary_key=True)
 
 
 class UUIDBaseModel(Base):
     __abstract__ = True
-    id = Column(UUID, primary_key=True)
+    id = Column(UUID(), primary_key=True)

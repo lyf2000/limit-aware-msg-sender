@@ -9,6 +9,8 @@ services:
     #   - .:/app
     environment:
       AMQP_URL: 'amqp://rmuser:rmpassword@rabbitmq:5672'
+      POSTGRES_URL: "postgresql://postgres:postgres@db:5432/"
+      APOSTGRES_URL: "postgresql+asyncpg://postgres:postgres@db:5432/"
   db:
     image: postgres:15.2-alpine
     volumes:
@@ -36,8 +38,9 @@ services:
 
   rabbitmq:
     image: 'rabbitmq:3.12.7-management'
+    hostname: "rabbitmq"
     volumes:
-      - "rabbitmq_data:/var/lib/rabbitmq"
+      - rabbitmq_data:/var/lib/rabbitmq
     ports:
       - '5672:5672'
       - '15672:15672'

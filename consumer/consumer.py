@@ -21,11 +21,11 @@ async def consume(message: ConsumerMessage):
         type=message.type,
     )
     await MessageModelService.create(message_event)
+    print(111111)
+    # logger.info(f"Sending {message_event.id}")
+    # result = await _send(message_event)
 
-    logger.info(f"Sending {message_event.id}")
-    result = await _send(message_event)
-
-    await _handle_send_result(result, message_event)
+    # await _handle_send_result(result, message_event)
 
 
 async def _send(message_event: MessageEvent):
