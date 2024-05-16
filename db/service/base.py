@@ -8,8 +8,8 @@ from db.models.base import Base
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class BaseModelService:
-    MODEL: Type[Base]
+class BaseModelService[T: Type[Base]]:
+    MODEL: T
 
     @classmethod
     async def create(cls, obj: "MODEL", session_: AsyncSession | None = None):
@@ -19,11 +19,3 @@ class BaseModelService:
 
             session.add(obj)
             await session.commit()
-
-    @classmethod
-    async def get(cls, **kwargs):
-        return await get(cls.select_by(**kwargs))
-
-    @classmethod
-    def select_by(cls, **kwargs):
-        return select(cls.MODEL).filter(**kwargs)
