@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 255e0da42f58
+Revision ID: 2fdd523a9aa0
 Revises: 
-Create Date: 2024-05-03 17:41:50.368849
+Create Date: 2024-05-10 16:53:30.398074
 
 """
 
@@ -14,7 +14,7 @@ import sqlalchemy_utils
 
 
 # revision identifiers, used by Alembic.
-revision: str = "255e0da42f58"
+revision: str = "2fdd523a9aa0"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -49,7 +49,7 @@ def upgrade() -> None:
         sa.Column("name", sa.String(length=64), nullable=False),
         sa.Column(
             "type",
-            sqlalchemy_utils.types.choice.ChoiceType(PlatformTypeChoices.CHOICES, impl=sa.SmallInteger()),
+            sqlalchemy_utils.types.choice.ChoiceType(PlatformTypeChoices.CHOICES, impl=sa.Integer()),
             nullable=False,
         ),
         sa.Column("id", sa.Integer(), nullable=False),
@@ -94,11 +94,11 @@ def upgrade() -> None:
     op.create_table(
         "message_events",
         sa.Column("text", sa.String(), nullable=False),
-        sa.Column("type", sa.String(length=64), nullable=False),
+        sa.Column("chat_id", sa.String(length=64), nullable=False),
+        sa.Column("reply_to", sa.String(length=64), nullable=True),
         sa.Column(
             "status",
-            sqlalchemy_utils.types.choice.ChoiceType(MessageStatusChoices.CHOICES, impl=sa.SmallInteger()),
-            default=MessageStatusChoices.WAITING,
+            sqlalchemy_utils.types.choice.ChoiceType(MessageStatusChoices.CHOICES, impl=sa.Integer()),
             nullable=True,
         ),
         sa.Column("client_id", sa.Integer(), nullable=False),

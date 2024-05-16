@@ -13,5 +13,7 @@ RUN pip install -r reqs.txt
 
 WORKDIR /app
 COPY . .
+RUN mv /app/consumer/main.py /app/
 
-CMD ["python", "/app/consumer/main.py"]
+
+CMD ["python", "/app/main.py"]

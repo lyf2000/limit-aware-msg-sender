@@ -29,6 +29,6 @@ class ConversationRule(BaseModel):
     conversation_type_id = mapped_column(ForeignKey("conversation_types.id"), nullable=False)
     conversation: Mapped["ConversationType"] = relationship("ConversationType", uselist=False)
 
-    period = mapped_column(Integer, nullable=False)
-    available = mapped_column(Integer, nullable=False)
-    per_chat = mapped_column(Boolean, nullable=False)
+    period = mapped_column(Integer(), nullable=False)
+    available = mapped_column(Integer(), nullable=False)
+    per_chat = mapped_column(Boolean(), nullable=False)

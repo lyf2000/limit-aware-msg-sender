@@ -1,8 +1,8 @@
-from pydantic import BaseModel
+from common.schema import CustomBaseModel
 
 
-class Message(BaseModel):
-    type: str  # conversation_type key
+class ConsumerMessage(CustomBaseModel):
+    # type: str  # conversation_type key
     client_id: int
 
     text: str

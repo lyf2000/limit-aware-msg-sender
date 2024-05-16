@@ -1,12 +1,17 @@
 import logging
-from common.logic.lock import LimitLockService
+
+from sqlalchemy import select
+from common.logic.lock import LimitMessageSendLockService
 from asyncio import sleep
 from common.logic.models.message import MessageEventLogic
-from common.service.senders import MESSAGE_SERVICE_PLATFORM_TYPE_MAP
 from common.service.senders.base import MessageSendResult, MessageSendResultStatusChoices
 from common.service.senders.errors import MessageSendError, MessageSendLimitExceedError
-from consumer.schema import Message
+from common.service.senders.gateway import SenderServiceGateway
+from consumer.schema import ConsumerMessage
+from db.connection import get, get_session_context
+from db.models.client import Client
 from db.models.message import MessageEvent
+from db.models.platform import Platform
 from db.service.message import MessageModelService
 
 
@@ -14,25 +19,28 @@ logger = logging.getLogger("message.sending")
 
 
 # TODO add logging decorator
-async def _consume(message: Message):
-    message_event = MessageEvent(
-        text=message.text,
-        client_id=message.client_id,
-        type=message.type,
-    )
-    await MessageModelService.create(message_event)
+async def consume(message: ConsumerMessage):
+    async with get_session_context() as session:
+        message_event = MessageEvent(
+            text=message.text,
+            client_id=message.client_id,
+            type=message.type,
+        )
+        await MessageModelService.create(message_event, session)
 
-    logger.info(f"Sending {message_event.id}")
-    result = await _send(message_event)
+        q = select(MessageEvent).where(MessageEvent.id == message_event.id).join(Client).join(Platform)
+        message_event = get(q)
+        logger.info(f"Sending {message_event.id}")
+        result = await _send(message_event)
 
-    await _handle_send_result(result, message_event)
+        await _handle_send_result(result, message_event)
 
 
 async def _send(message_event: MessageEvent):
     # TODO what if error -> what to do with locking
-    while not await LimitLockService(message_event).can_send():
+    while not await LimitMessageSendLockService(message_event).can_send():
         await sleep(0.5)  # TODO
-    return await MESSAGE_SERVICE_PLATFORM_TYPE_MAP[message_event.client.platform.type](message_event).send()
+    return await SenderServiceGateway(message_event).send_message()
 
 
 async def _handle_send_result(result: MessageSendResult, message_event: MessageEvent):

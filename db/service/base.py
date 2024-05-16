@@ -1,24 +1,21 @@
+from contextlib import nullcontext
 from typing import Type
 
 from sqlalchemy import select
 
-from db.connection import get, get_session, get_session_context
+from db.connection import get, get_session_context
 from db.models.base import Base
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class BaseModelService:
-    MODEL: Type[Base]
+class BaseModelService[T: Type[Base]]:
+    MODEL: T
 
     @classmethod
-    async def create(cls, obj: MODEL):
-        with get_session_context() as session:
+    async def create(cls, obj: "MODEL", session_: AsyncSession | None = None):
+        async with nullcontext() if session_ else get_session_context() as session:
+            if session_:
+                session = session_
+
             session.add(obj)
-            session.commit()
-
-    @classmethod
-    async def get(cls, **kwargs):
-        return await get(cls.select_by(**kwargs))
-
-    @classmethod
-    def select_by(cls, **kwargs):
-        return select(cls.MODEL).filter(**kwargs)
+            await session.commit()

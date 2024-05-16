@@ -27,12 +27,17 @@ class MessageEvent(BaseModel):
     __tablename__ = "message_events"
 
     text = mapped_column(String, nullable=False, default="")
-    type = mapped_column(String(64), nullable=False)
+
+    chat_id = mapped_column(String(64), nullable=False)
+    reply_to = mapped_column(String(64), nullable=True)
+
+    # TODO add comment
+    # type = mapped_column(String(64), nullable=False)
 
     status = mapped_column(
-        ChoiceType(MessageStatusChoices.CHOICES, impl=SmallInteger),
+        ChoiceType(MessageStatusChoices.CHOICES, impl=SmallInteger()),
         default=MessageStatusChoices.WAITING,
     )
 
     client_id = mapped_column(ForeignKey("clients.id"), nullable=False)
-    client: Mapped["Client"] = relationship("Client", uselist=False)
+    client: Mapped["Client"] = relationship("Client", uselist=False, lazy="subquery")  # TODO subquery ??
