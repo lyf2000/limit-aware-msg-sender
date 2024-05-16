@@ -1,14 +1,14 @@
 import logging
 
 from sqlalchemy import select
-from common.logic.lock import LimitLockService
+from common.logic.lock import LimitMessageSendLockService
 from asyncio import sleep
 from common.logic.models.message import MessageEventLogic
-from common.service.senders import MESSAGE_SERVICE_PLATFORM_TYPE_MAP
 from common.service.senders.base import MessageSendResult, MessageSendResultStatusChoices
 from common.service.senders.errors import MessageSendError, MessageSendLimitExceedError
+from common.service.senders.gateway import SenderServiceGateway
 from consumer.schema import ConsumerMessage
-from db.connection import get, get_session, get_session_context
+from db.connection import get, get_session_context
 from db.models.client import Client
 from db.models.message import MessageEvent
 from db.models.platform import Platform
@@ -38,10 +38,9 @@ async def consume(message: ConsumerMessage):
 
 async def _send(message_event: MessageEvent):
     # TODO what if error -> what to do with locking
-    while not await LimitLockService(message_event).can_send():
+    while not await LimitMessageSendLockService(message_event).can_send():
         await sleep(0.5)  # TODO
-    print(111111, message_event.client.platform)
-    return await MESSAGE_SERVICE_PLATFORM_TYPE_MAP[message_event.client.platform.type](message_event).send()
+    return await SenderServiceGateway(message_event).send_message()
 
 
 async def _handle_send_result(result: MessageSendResult, message_event: MessageEvent):

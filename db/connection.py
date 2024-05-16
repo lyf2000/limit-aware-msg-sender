@@ -1,4 +1,4 @@
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, nullcontext
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,4 +18,6 @@ async def get_session() -> AsyncSession:
 
 
 async def get(q, session_=None):
-    return await (session_ or (await get_session())).execute(q).one()
+    async with nullcontext() if session_ else get_session_context() as session:
+        session = session_ if session_ else session
+        return (await session.execute(q)).scalars().all()[0]
