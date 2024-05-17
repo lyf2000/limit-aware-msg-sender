@@ -21,4 +21,4 @@ class Client(BaseModel):
     platform_id = mapped_column(ForeignKey("platforms.id"), nullable=False)
     platform: Mapped["Platform"] = relationship("Platform", uselist=False, lazy="subquery")
 
-    message_events: Mapped[list["MessageEvent"]] = relationship("Platform")
+    message_events: Mapped[list["MessageEvent"]] = relationship("MessageEvent")

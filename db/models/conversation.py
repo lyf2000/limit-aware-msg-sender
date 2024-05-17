@@ -18,17 +18,17 @@ class ConversationType(BaseModel):
     key = mapped_column(String(64), nullable=False)
 
     platform_id = mapped_column(ForeignKey("platforms.id"), nullable=False)
-    platform: Mapped["Platform"] = relationship("Platform", uselist=False)
+    platform: Mapped["Platform"] = relationship("Platform", uselist=False, back_populates="conversation_types")
+    # TODO add client
 
     rules: Mapped[list["ConversationRule"]] = relationship("ConversationRule")
 
 
 class ConversationRule(BaseModel):
     __tablename__ = "conversation_rules"
-
     conversation_type_id = mapped_column(ForeignKey("conversation_types.id"), nullable=False)
     conversation: Mapped["ConversationType"] = relationship("ConversationType", uselist=False)
 
-    period = mapped_column(Integer(), nullable=False)
-    available = mapped_column(Integer(), nullable=False)
-    per_chat = mapped_column(Boolean(), nullable=False)
+    period = mapped_column(Integer(), nullable=False)  # in seconds
+    available = mapped_column(Integer(), nullable=False)  # N requests per period
+    per_chat = mapped_column(Boolean(), nullable=False)  # per chat either per client

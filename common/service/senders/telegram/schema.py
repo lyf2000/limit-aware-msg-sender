@@ -1,8 +1,8 @@
-from common.schema import CoercedIntNullable, CustomBaseModel
+from common.schema import CoercedInt, CoercedIntNullable, CustomBaseModel
 
 
 class BaseTelegramMessageSchema(CustomBaseModel):
-    chat_id: int
+    chat_id: CoercedInt
 
 
 class SendTextMessageSchema(BaseTelegramMessageSchema):

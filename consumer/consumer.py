@@ -24,7 +24,7 @@ async def consume(message: ConsumerMessage):
         message_event = MessageEvent(
             text=message.text,
             client_id=message.client_id,
-            type=message.type,
+            # type=message.type,
         )
         await MessageModelService.create(message_event, session)
 
