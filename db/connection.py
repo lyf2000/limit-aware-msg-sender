@@ -17,7 +17,11 @@ async def get_session() -> AsyncSession:
         yield session
 
 
-async def get(q, session_=None):
+async def list(q, session_=None):
     async with nullcontext() if session_ else get_session_context() as session:
         session = session_ if session_ else session
-        return (await session.execute(q)).scalars().all()[0]
+        return (await session.execute(q)).scalars().all()
+
+
+async def get(q, session_=None):
+    return (await list(q, session_))[0]

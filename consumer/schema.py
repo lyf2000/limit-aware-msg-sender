@@ -6,3 +6,4 @@ class ConsumerMessage(CustomBaseModel):
     client_id: int
 
     text: str
+    chat_id: str

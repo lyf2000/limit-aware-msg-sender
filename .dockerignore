@@ -1,6 +1,5 @@
 venv
 compose
-.env
 migrations
 alembic.ini
 __pycache__

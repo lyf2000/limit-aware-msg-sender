@@ -28,8 +28,8 @@ class Platform(BaseModel):
     name = mapped_column(String(64), nullable=False)
     type = mapped_column(ChoiceType(PlatformTypeChoices.CHOICES, impl=SmallInteger()), nullable=False)  # TODO unique?
 
-    conversation_types: Mapped[list["ConversationType"]] = relationship("ConversationType")
-    clients: Mapped[list["Client"]] = relationship("Client")
+    conversation_types: Mapped[list["ConversationType"]] = relationship("ConversationType", back_populates="platform")
+    clients: Mapped[list["Client"]] = relationship("Client", back_populates="platform")
 
     def __repr__(self) -> str:
         return self.name

@@ -1,6 +1,5 @@
 import logging
 
-from sqlalchemy import select
 from common.logic.lock import LimitMessageSendLockService
 from asyncio import sleep
 from common.logic.models.message import MessageEventLogic
@@ -23,31 +22,36 @@ async def consume(message: ConsumerMessage):
     async with get_session_context() as session:
         message_event = MessageEvent(
             text=message.text,
+            chat_id=message.chat_id,
             client_id=message.client_id,
-            type=message.type,
+            # type=message.type,
         )
         await MessageModelService.create(message_event, session)
 
-        q = select(MessageEvent).where(MessageEvent.id == message_event.id).join(Client).join(Platform)
-        message_event = get(q)
+        q = MessageModelService.select().where(MessageEvent.id == message_event.id).join(Client).join(Platform)
+        message_event = await MessageModelService.get(q)
         logger.info(f"Sending {message_event.id}")
         result = await _send(message_event)
 
         await _handle_send_result(result, message_event)
 
 
-async def _send(message_event: MessageEvent):
+async def _send(message_event: MessageEvent) -> MessageSendResult:
     # TODO what if error -> what to do with locking
-    while not await LimitMessageSendLockService(message_event).can_send():
+    limit_lock = LimitMessageSendLockService(message_event)
+    while not await limit_lock.can_send():
         await sleep(0.5)  # TODO
-    return await SenderServiceGateway(message_event).send_message()
+
+    result = await SenderServiceGateway(message_event).send_message()
+    await limit_lock.tried_send()  # TODO check if result OK else not decr
+    return result
 
 
 async def _handle_send_result(result: MessageSendResult, message_event: MessageEvent):
+    await MessageEventLogic.message_sending_event(message_event, result)
 
     if result.status == MessageSendResultStatusChoices.SENT:
         logger.info(f"Sent message {message_event.id}")
-        await MessageEventLogic.message_sent_success(message_event)
     elif result.status == MessageSendResultStatusChoices.LIMIT_EXCEEDED:
         logger.warn(
             f"Limit exceeded sending message {message_event.client.platform}({message_event.client.platform_id}), {message_event.id}"
