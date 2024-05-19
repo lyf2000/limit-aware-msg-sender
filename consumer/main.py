@@ -24,6 +24,8 @@ async def process_message(
 
 
 def main() -> None:
+    asyncio.run((decl_xc()))
+
     queues_per_core = settings.QUEUE_N // multiprocessing.cpu_count()
     if not queues_per_core:
         queues_per_core = 1
@@ -32,9 +34,17 @@ def main() -> None:
         multiprocessing.Process(target=run_queues_per_core, args=(queue_nums,)).start()
 
 
+async def decl_xc():
+    connection = await aio_pika.connect_robust(os.getenv("AMQP_URL"))
+    channel = await connection.channel()
+    queue = await channel.declare_exchange(
+        "messages", aio_pika.ExchangeType.X_CONSISTENT_HASH, durable=True, auto_delete=True
+    )
+
+
 def run_queues_per_core(nums: list[int]):
     for queue_num in nums:
-        asyncio.run(run_single_queue(queue_num))
+        asyncio.run(run_single_queue(queue_num + 1))
 
 
 async def run_single_queue(num: int) -> None:
@@ -49,8 +59,8 @@ async def run_single_queue(num: int) -> None:
     await channel.set_qos(prefetch_count=100)
 
     # Declaring queue
-    # queue = await channel.declare_exchange('message', aio_pika.ExchangeType.)
     queue = await channel.declare_queue(queue_name)
+    await queue.bind(exchange="messages", routing_key=f"{num}")
 
     await queue.consume(process_message)
 
