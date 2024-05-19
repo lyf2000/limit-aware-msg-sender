@@ -16,7 +16,7 @@ services:
       POSTGRES_URL: "postgresql://postgres:postgres@db:5432/"
       APOSTGRES_URL: "postgresql+asyncpg://postgres:postgres@db:5432/"
       REDIS_URL: "redis://redis:6379"
-      QUEUE_N: 8
+      QUEUE_N: ${QUEUE_N}
   db:
     image: postgres:15.2-alpine
     volumes:
