@@ -7,10 +7,9 @@ services:
       dockerfile: ./compose/consumer/Dockerfile
     # volumes:
     #   - .:/app
-    # depends_on:
-    #   - db
-    #   - rabbitmq
-    #   - redis
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     environment:  # TODO mv to .env
       AMQP_URL: 'amqp://rmuser:rmpassword@rabbitmq:5672'
       POSTGRES_URL: "postgresql://postgres:postgres@db:5432/"
@@ -45,7 +44,9 @@ services:
       - 6379:6379
 
   rabbitmq:
-    image: 'rabbitmq:3.12.7-management'
+    build:
+      context: .
+      dockerfile: ./compose/consumer/rabbitmq.Dockerfile
     hostname: "rabbitmq"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
@@ -55,6 +56,11 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: 'rmuser'
       RABBITMQ_DEFAULT_PASS: 'rmpassword'
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
