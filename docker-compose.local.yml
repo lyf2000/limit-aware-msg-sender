@@ -7,10 +7,15 @@ services:
       dockerfile: ./compose/consumer/Dockerfile
     # volumes:
     #   - .:/app
-    environment:
+    # depends_on:
+    #   - db
+    #   - rabbitmq
+    #   - redis
+    environment:  # TODO mv to .env
       AMQP_URL: 'amqp://rmuser:rmpassword@rabbitmq:5672'
       POSTGRES_URL: "postgresql://postgres:postgres@db:5432/"
       APOSTGRES_URL: "postgresql+asyncpg://postgres:postgres@db:5432/"
+      REDIS_URL: "redis://redis:6379"
   db:
     image: postgres:15.2-alpine
     volumes:

@@ -3,4 +3,4 @@ from common.settings import settings
 
 
 redis_pool = aioredis.ConnectionPool.from_url(settings.REDIS_URL, decode_responses=True)
-print("init redis pool")
+print("init redis pool")  # TODO prints twice

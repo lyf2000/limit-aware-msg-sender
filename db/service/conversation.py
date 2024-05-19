@@ -26,7 +26,7 @@ class ConversationRuleModelService(BaseModelService):
     ) -> list[ConversationRule]:
         chat_type = await PlatformIntegrationGateway(message_event).get_chat_type()
         q = (
-            cls.select(cls.MODEL)
+            cls.select()
             .join(ConversationType)
             .filter(
                 or_(

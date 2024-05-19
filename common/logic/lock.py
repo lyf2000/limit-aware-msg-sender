@@ -1,5 +1,5 @@
 # Decentrelazed locking
-from common.cache.message_event_send_lock.base import RuleSendMessageLockDetailRedisApi
+from common.cache.message_event_send_lock.client import RuleSendMessageLockDetailRedisApi
 from common.utils import asyncinit
 from db.models.conversation import ConversationRule
 from db.models.message import MessageEvent
@@ -20,20 +20,23 @@ class LimitMessageSendLockService:
             ).get()
 
         return await anext(
-            (False for rule in await self._rules() if (await get_rule_available(rule)) < 0),
+            (False for rule in await self._rules() if (await get_rule_available(rule)) < 1),
             True,
         )
 
-    async def bb(self):
-        async def get_rule_available(rule) -> int:
+    async def tried_send(self):
+        """Decrement all rules' available."""
+
+        async def decr(rule) -> int:
             return await (
                 await RuleSendMessageLockDetailRedisApi(
                     message_event=self.message_event,
                     rule=rule,
                 )
-            ).get()
+            ).decr()
 
-        return await get_rule_available((await self._rules())[0])
+        for rule in await self._rules():
+            await decr(rule)
 
     async def _rules(self) -> list[ConversationRule]:
         return await ConversationRuleModelService.get_list_for_message_event(
