@@ -3,7 +3,7 @@ import ast
 import asyncio
 from functools import wraps
 import json
-from typing import Callable
+from typing import Callable, Iterable
 
 
 def bytes_to_dict(string: bytes) -> dict:
@@ -41,3 +41,7 @@ def asyncinit(cls):
 
     cls.__new__ = new
     return cls
+
+
+def chunker(seq: Iterable, size: int):
+    return (seq[pos : pos + size] for pos in range(0, len(seq), size))

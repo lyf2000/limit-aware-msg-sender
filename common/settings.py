@@ -6,5 +6,8 @@ class Settings(BaseSettings):
     APOSTGRES_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/"
     REDIS_URL: str = "redis://localhost:6379"
 
+    # Consumer
+    QUEUE_N: int = 4
+
 
 settings = Settings()
