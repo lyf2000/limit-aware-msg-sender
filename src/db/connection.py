@@ -1,12 +1,17 @@
 from contextlib import asynccontextmanager, nullcontext
+import logging
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models.base import a_engine
 
 
+logger = logging.getLogger("db.session")
+
+
 @asynccontextmanager
 async def get_session_context() -> AsyncSession:
+    logger.info("session created")
     async_session = sessionmaker(a_engine, class_=AsyncSession, expire_on_commit=False)
     async with async_session() as session:
         yield session
