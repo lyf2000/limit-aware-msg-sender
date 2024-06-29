@@ -4,13 +4,8 @@ import os
 import aio_pika
 
 
-from common.utils import chunker
-from consumer.consumer import consume
+from consumer.consume import consume
 from consumer.schema import ConsumerMessage
-from common.settings import settings
-
-
-import multiprocessing
 
 
 async def process_message(
@@ -23,28 +18,32 @@ async def process_message(
         await consume(ConsumerMessage(**body))
 
 
-def main() -> None:
+def main(queue_num=1) -> None:
     asyncio.run((decl_xc()))
+    asyncio.run(run_single_queue(queue_num))
 
-    queues_per_core = settings.QUEUE_N // multiprocessing.cpu_count()
-    if not queues_per_core:
-        queues_per_core = 1
+    # queues_per_core = settings.QUEUE_N // multiprocessing.cpu_count()
+    # if not queues_per_core:
+    #     queues_per_core = 1
 
-    for queue_nums in chunker(range(settings.QUEUE_N), queues_per_core):
-        multiprocessing.Process(target=run_queues_per_core, args=(queue_nums,)).start()
+    # for queue_nums in chunker(range(settings.QUEUE_N), queues_per_core):
+    #     multiprocessing.Process(target=run_queues_per_core, args=(queue_nums,)).start()
+
+
+# def run_queues_per_core(nums: list[int]):
+#     for queue_num in nums:
+#         asyncio.run(run_single_queue(queue_num + 1))
 
 
 async def decl_xc():
     connection = await aio_pika.connect_robust(os.getenv("AMQP_URL"))
     channel = await connection.channel()
-    queue = await channel.declare_exchange(
-        "messages", aio_pika.ExchangeType.X_CONSISTENT_HASH, durable=True, auto_delete=True
+    await channel.declare_exchange(
+        "messages",
+        aio_pika.ExchangeType.X_CONSISTENT_HASH,
+        durable=True,
+        auto_delete=False,
     )
-
-
-def run_queues_per_core(nums: list[int]):
-    for queue_num in nums:
-        asyncio.run(run_single_queue(queue_num + 1))
 
 
 async def run_single_queue(num: int) -> None:
@@ -60,7 +59,7 @@ async def run_single_queue(num: int) -> None:
 
     # Declaring queue
     queue = await channel.declare_queue(queue_name)
-    await queue.bind(exchange="messages", routing_key=f"{num}")
+    await queue.bind(exchange="messages", routing_key=f"{num}")  # TODO why
 
     await queue.consume(process_message)
 

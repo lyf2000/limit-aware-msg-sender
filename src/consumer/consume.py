@@ -7,7 +7,7 @@ from common.service.senders.base import MessageSendResult, MessageSendResultStat
 from common.service.senders.errors import MessageSendError, MessageSendLimitExceedError
 from common.service.senders.gateway import SenderServiceGateway
 from consumer.schema import ConsumerMessage
-from db.connection import get, get_session_context
+from db.connection import get_session_context
 from db.models.client import Client
 from db.models.message import MessageEvent
 from db.models.platform import Platform
