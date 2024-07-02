@@ -26,7 +26,7 @@ async def consume(message: ConsumerMessage):
         )
         await MessageModelService.create(message_event, session)
 
-        q = MessageModelService.select().where(MessageEvent.id == message_event.id).join(Client).join(Platform)
+        q = MessageModelService.select().where(MessageEvent.id == message_event.id)
         message_event = await MessageModelService.get(q)
         logger.info(f"Sending {message_event.id}")
         result = await _send(message_event)

@@ -4,6 +4,7 @@ from typing import Type
 import aiohttp
 from abc import ABC, abstractmethod
 
+from common.choices import BaseChoices
 from common.client import BaseClient
 from common.logic.lock import LimitMessageSendLockService
 from common.logic.models.message import MessageEventLogic
@@ -25,10 +26,16 @@ async def _send(message_event: MessageEvent) -> "MessageSendingResult":
     return result
 
 
-class MessageSendingResultStatusChoices:
+class MessageSendingResultStatusChoices(BaseChoices):
     SENT = 1
     ERROR = -1
     LIMIT_EXCEEDED = -2
+
+    CHOICES = (
+        (SENT, "SENT"),
+        (ERROR, "ERROR"),
+        (LIMIT_EXCEEDED, "LIMIT_EXCEEDED"),
+    )
 
 
 class MessageSendingResult:

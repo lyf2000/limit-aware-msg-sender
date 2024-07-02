@@ -3,9 +3,8 @@ from common.service.senders.base import MessageSendingResultStatusChoices, Messa
 from common.service.senders.errors import MessageSendingError, MessageSendingLimitExceedError
 from consumer.consume import consume
 from consumer.schema import ConsumerMessage
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 from db.models.client import Client
-from db.models.message import MessageEvent
 from db.models.platform import Platform
 from tests.conftest import apatch
 from unittest.mock import call
@@ -31,6 +30,31 @@ async def test_consume(mocked_send, mocked_handle_send_result, string, client_):
     assert await MessageModelService.count() == 1
     mocked_send.assert_called_once_with(await MessageModelService.get())
     mocked_handle_send_result.assert_called_once()
+
+
+@pytest.mark.skip
+@apatch("consumer.consume._send")
+async def test_consume_joins_passed(mocked_send, string, client_, subtests):
+    # GIVEN
+    mocked_send.return_value = MessageSendingResult
+    message = ConsumerMessage(
+        client_id=client_.id,
+        text=string(),
+        chat_id=string(),
+    )
+
+    # WHEN THEN
+    with patch("common.service.senders.base.MessageSendingResult.handle"):
+        await consume(message)
+    for status in MessageSendingResultStatusChoices.keys():
+        with patch("common.service.senders.base.MessageEventLogic.save_sending_result"):
+            with subtests.test():
+                await MessageSendingResult(
+                    message_event=mocked_send.call_args[0][0],
+                    status=status,
+                    detail=string(),
+                    code=string(),
+                ).handle()
 
 
 # region send
@@ -89,16 +113,12 @@ async def test_send_can_send_after_sleep(
         (MessageSendingResultStatusChoices.SENT, None),
         (MessageSendingResultStatusChoices.LIMIT_EXCEEDED, MessageSendingLimitExceedError),
         (MessageSendingResultStatusChoices.ERROR, MessageSendingError),
-        (MessageSendingResultStatusChoices.LIMIT_EXCEEDED, MessageSendingLimitExceedError),
+        ("b", ValueError),
     ),
 )
 async def test_handle_send_result(mocked_save_sending_result, status, error, string, message_event_):
     # GIVEN
-    message_event_ = await MessageModelService.get(
-        MessageModelService.select()
-        .join(Client, Client.id == MessageEvent.client_id)
-        .join(Platform, Platform.id == Client.platform_id)
-    )
+    message_event_ = await MessageModelService.get()
     result = MessageSendingResult(
         message_event=message_event_,
         status=status,
@@ -112,6 +132,8 @@ async def test_handle_send_result(mocked_save_sending_result, status, error, str
             await result.handle()
     else:
         await result.handle()
+
+    mocked_save_sending_result.assert_called_once_with(result)
 
 
 # endregion handle_send_result
