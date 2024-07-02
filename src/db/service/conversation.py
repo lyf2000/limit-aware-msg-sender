@@ -13,7 +13,7 @@ class ConversationTypeModelService(BaseModelService):
 
     @classmethod
     async def get_by_type(cls, platform_id: int, type: str, session: AsyncSession | None = None):
-        q = cls.get(cls.select(cls.MODEL).filter(platform_id=platform_id, key=type))
+        q = cls.get(cls.select().filter(platform_id=platform_id, key=type))
         return await cls.get(q, session)
 
 

@@ -1,5 +1,6 @@
 import os
 import sys
+from unittest.mock import AsyncMock, patch
 
 PROJECT_PATH = os.getcwd()
 SOURCE_PATH = os.path.join(PROJECT_PATH, "src")
@@ -7,11 +8,14 @@ sys.path.append(SOURCE_PATH)
 
 
 import pytest
-from alembic.config import Config
-from alembic import command
 
-from db.connection import get_session_context
-from db.models.base import a_engine, Base
+from sqlalchemy.ext.asyncio import AsyncSession
+from db.models.base import a_engine_factory, Base, engine_factory as engine_
+from tests.fixtures import *
+from functools import partial
+
+
+apatch = partial(patch, new_callable=AsyncMock)
 
 
 @pytest.fixture()
@@ -22,31 +26,25 @@ def settings():
 
 
 @pytest.fixture(scope="session")
-async def engine():
-    return a_engine
+async def aengine():
+    yield a_engine_factory()
+    # a_engine.sync_engine.dispose()
 
 
 @pytest.fixture(scope="session")
-async def session():
-    async with get_session_context() as session_:
-        yield session_
-        await session_.rollback()
+async def engine():
+    yield engine_()
+    # engine_.dispose()
 
 
-def drop_db(engine):
-    try:
-        Base.metadata.drop_all(engine)
-        Base.metadata.create_all(engine)
-    except Exception as e:
-        print(e)
+@pytest.fixture()
+async def session(aengine):
+    async with AsyncSession(aengine) as session:
+        yield session
+        # await session_.rollback()
 
 
-# TODO disable for unused cases
 @pytest.fixture(autouse=True)
 def setup_database(engine):
-    drop_db(engine)
-
-    alembic_cfg = Config("alembic.ini")
-    command.upgrade(alembic_cfg, "head")  # Upgrade to the latest migration
-
-    drop_db(engine)
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)

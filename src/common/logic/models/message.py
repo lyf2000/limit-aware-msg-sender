@@ -1,13 +1,14 @@
+from typing import TYPE_CHECKING
 from sqlalchemy.ext.asyncio import AsyncSession
-from common.service.senders.base import MessageSendResult
-from db.models.message import MessageEvent, MessageStatusChoices
 from db.service.message import MessageModelService
+
+
+if TYPE_CHECKING:
+    from common.service.senders.base import MessageSendingResult
 
 
 class MessageEventLogic:
     @classmethod
-    async def message_sending_event(
-        cls, message_event: MessageEvent, result: MessageSendResult, session: AsyncSession | None = None
-    ):
-        message_event.status = result.status
-        await MessageModelService.save(message_event, session)
+    async def save_sending_result(cls, result: "MessageSendingResult", session: AsyncSession | None = None):
+        result.message_event.status = result.status
+        await MessageModelService.save(result.message_event, session)

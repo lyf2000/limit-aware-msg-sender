@@ -1,5 +1,5 @@
-from common.service.senders.base import BaseSenderService, MessageSendResult
+from common.service.senders.base import BaseSenderService, MessageSendingResult
 
 
 class VkMessageSenderService(BaseSenderService):
-    def send(self) -> MessageSendResult: ...
+    def send(self) -> MessageSendingResult: ...

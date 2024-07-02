@@ -4,6 +4,7 @@ from sqlalchemy import ForeignKey, SmallInteger, String
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped, relationship
 
+from common.choices import BaseChoices
 from db.models.base import BaseModel
 
 
@@ -11,7 +12,7 @@ if TYPE_CHECKING:
     from db.models.client import Client
 
 
-class MessageStatusChoices:
+class MessageStatusChoices(BaseChoices):
     WAITING = 0
     SENT = 1
     ERROR = -1

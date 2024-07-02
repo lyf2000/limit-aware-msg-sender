@@ -4,12 +4,19 @@ from sqlalchemy.orm import DeclarativeBase
 from common.settings import settings
 
 
-a_engine = create_async_engine(settings.APOSTGRES_URL, echo=True, future=True)
-engine = create_engine(settings.POSTGRES_URL, echo=True, future=True)
+a_engine_factory = lambda: create_async_engine(settings.APOSTGRES_URL, echo=True, future=True)
+engine_factory = lambda: create_engine(settings.POSTGRES_URL, echo=True, future=True)
 
 
 class Base(DeclarativeBase):
-    pass
+    def __eq__(self, value: object) -> bool:
+        res = super().__eq__(value)
+        if res is True:
+            return res
+
+        if self.id:
+            return self.id == value.id
+        raise ValueError
 
 
 convention = {

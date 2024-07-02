@@ -4,6 +4,7 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy_utils import ChoiceType
 
+from common.choices import BaseChoices
 from db.models.base import BaseModel
 
 
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
     from db.models.client import Client
 
 
-class PlatformTypeChoices:
+class PlatformTypeChoices(BaseChoices):
     TELEGRAM = 1
     VK = 2
 

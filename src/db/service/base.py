@@ -3,7 +3,7 @@ from typing import Type
 
 from sqlalchemy import select as db_select
 
-from db.connection import get as db_get, get_session_context, list as db_list
+from db.connection import count as db_count, get as db_get, get_session_context, list as db_list
 from db.models.base import Base
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,13 +16,15 @@ class BaseModelService[T: Type[Base]]:
         return db_select(cls.MODEL)
 
     @classmethod
-    async def create(cls, obj: T, session_: AsyncSession | None = None):
+    async def create(cls, obj: T, session_: AsyncSession | None = None) -> T:
         async with nullcontext() if session_ else get_session_context() as session:
             if session_:
                 session = session_
 
             session.add(obj)
             await session.commit()
+
+            return obj
 
     @classmethod
     async def save(cls, obj: T, session_: AsyncSession | None = None):  # TODO fix
@@ -34,9 +36,19 @@ class BaseModelService[T: Type[Base]]:
             await session.commit()
 
     @classmethod
-    async def get(cls, q, session: AsyncSession | None = None):
+    async def get(cls, q=None, session: AsyncSession | None = None):
+        if q is None:
+            q = cls.select()
         return await db_get(q, session)
 
     @classmethod
-    async def list(cls, q, session: AsyncSession | None = None):
+    async def list(cls, q=None, session: AsyncSession | None = None):
+        if q is None:
+            q = cls.select()
         return await db_list(q, session)
+
+    @classmethod
+    async def count(cls, q=None, session: AsyncSession | None = None):
+        if q is None:
+            q = cls.select()
+        return await db_count(q, session)

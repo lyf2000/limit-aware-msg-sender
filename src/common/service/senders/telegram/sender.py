@@ -1,5 +1,5 @@
 from typing import Callable
-from common.service.senders.base import BaseSenderService, MessageSendResult
+from common.service.senders.base import BaseSenderService, MessageSendingResult
 from common.service.senders.telegram.mixin import SendTextMixin
 
 
@@ -9,7 +9,7 @@ class TelegramMessageSenderService(SendTextMixin, BaseSenderService):
         https://core.telegram.org/bots/api#available-methods
     """
 
-    async def send(self) -> MessageSendResult:
+    async def send(self) -> MessageSendingResult:
         return await self._select_method()()
 
     def _select_method(self) -> Callable:

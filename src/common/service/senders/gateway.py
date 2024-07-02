@@ -1,11 +1,12 @@
-from typing import Type
+from typing import TYPE_CHECKING, Type
 from common.client import BaseClient
-from common.service.senders.base import BaseSenderService, MessageSendResult
-from common.service.senders.telegram.client import TelegramClient
-from common.service.senders.telegram.sender import TelegramMessageSenderService
-from common.service.senders.vk import VkMessageSenderService
+
 from db.models.message import MessageEvent
 from db.models.platform import PlatformTypeChoices
+
+
+if TYPE_CHECKING:
+    from common.service.senders.base import BaseSenderService, MessageSendingResult
 
 
 class SenderServiceGateway:
@@ -15,11 +16,17 @@ class SenderServiceGateway:
         self.sender = self._sender_factory()
 
     def _client_factory(self) -> BaseClient | Type[BaseClient]:
+        # TODO refact imports
+        from common.service.senders.telegram.client import TelegramClient
+
         return {
             PlatformTypeChoices.TELEGRAM: TelegramClient,
         }.get(self.message_event.client.platform.type, BaseClient)()
 
-    def _sender_factory(self) -> Type[BaseSenderService]:
+    def _sender_factory(self) -> Type["BaseSenderService"]:
+        from common.service.senders.telegram.sender import TelegramMessageSenderService
+        from common.service.senders.vk import VkMessageSenderService
+
         sender_service = {
             PlatformTypeChoices.TELEGRAM: TelegramMessageSenderService,
             PlatformTypeChoices.VK: VkMessageSenderService,
@@ -30,5 +37,5 @@ class SenderServiceGateway:
             client=self.client,
         )
 
-    async def send_message(self) -> MessageSendResult:
+    async def send_message(self) -> "MessageSendingResult":
         return await self.sender.send()
